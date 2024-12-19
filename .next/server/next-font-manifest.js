@@ -1,0 +1,1 @@
+self.__NEXT_FONT_MANIFEST='{"pages":{},"app":{"/Users/konstantinoslepidas/Desktop/football/app/layout":["static/media/a34f9d1faa5f3315-s.p.woff2","static/media/28aa5118b38b86e4-s.p.woff2","static/media/98a28a5430a3cf7f-s.p.woff2","static/media/d602976d04712c39-s.p.woff2","static/media/faa7e13632bbe29e-s.p.woff2"]},"appUsingSizeAdjust":true,"pagesUsingSizeAdjust":false}';

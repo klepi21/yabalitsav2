@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+@layer base {
+  :root {
+    /* Modern soccer-inspired theme */
+    --background: 200 33% 98%; /* Light blue-gray background */
+    --foreground: 200 50% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 200 50% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 50% 20%;
+    
+    /* Grass green as primary color */
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Soccer ball colors */
+    --secondary: 200 10% 96%;
+    --secondary-foreground: 200 50% 20%;
+    
+    /* Subtle accents */
+    --muted: 200 10% 94%;
+    --muted-foreground: 200 20% 40%;
+    --accent: 142 76% 97%;
+    --accent-foreground: 142 76% 36%;
+    
+    /* Warning/destructive colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    /* UI elements */
+    --border: 200 20% 92%;
+    --input: 200 20% 92%;
+    --ring: 142 76% 36%;
+    
+    /* Chart colors */
+    --chart-1: 142 76% 36%; /* Grass green */
+    --chart-2: 200 76% 50%; /* Sky blue */
+    --chart-3: 32 90% 60%;  /* Soccer orange */
+    --chart-4: 0 0% 20%;    /* Deep black */
+    --chart-5: 0 0% 100%;   /* Pure white */
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 200 50% 10%;
+    --foreground: 0 0% 98%;
+    --card: 200 50% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 200 50% 12%;
+    --popover-foreground: 0 0% 98%;
+    
+    /* Brighter grass green in dark mode */
+    --primary: 142 76% 46%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 200 50% 16%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 200 50% 16%;
+    --muted-foreground: 200 20% 70%;
+    --accent: 142 76% 16%;
+    --accent-foreground: 142 76% 46%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 200 50% 16%;
+    --input: 200 50% 16%;
+    --ring: 142 76% 46%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
