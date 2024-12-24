@@ -11,8 +11,8 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getSession();
 
   // List of public paths that don't require authentication
-  const publicPaths = ['/', '/login'];
-  const isPublicPath = publicPaths.includes(req.nextUrl.pathname);
+  const publicPaths = ['/', '/login', '/auth/callback', '/auth/login'];
+  const isPublicPath = publicPaths.some(path => req.nextUrl.pathname.startsWith(path));
 
   // If the user is not signed in and the path requires auth, redirect to login
   if (!session && !isPublicPath) {
@@ -38,7 +38,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - api routes
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
