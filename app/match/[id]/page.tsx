@@ -348,12 +348,13 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.href
+        redirectTo: `${window.location.origin}/match/${params.id}`,
+        skipBrowserRedirect: false
       }
     });
   };
 
-  if (loading) return <div className="p-4">Loading...</div>;
+  if (loading && user !== null) return <div className="p-4">Loading...</div>;
   if (!match) return <div className="p-4">Match not found</div>;
 
   const matchDate = new Date(match.match_date);
@@ -378,14 +379,14 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
 
   return (
     <div className="p-4 space-y-6 relative">
-      <Card className="border-none shadow-none">
+      <Card className="border-none shadow-none relative">
         <FieldCover className="rounded-t-lg" />
         {!user && (
-          <div className="absolute inset-0 backdrop-blur-md z-50 flex flex-col items-center justify-center gap-4 bg-background/50">
-            <div className="text-center space-y-4 p-6 rounded-lg bg-background/80 backdrop-blur shadow-lg max-w-md mx-auto">
+          <div className="absolute inset-0 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-4 bg-background/30">
+            <div className="text-center space-y-4 p-6 rounded-lg bg-background/95 backdrop-blur shadow-lg max-w-md mx-auto">
               <h2 className="text-2xl font-bold">Καλώς ήρθατε στο Yabalitsa!</h2>
               <p className="text-muted-foreground">
-                Για να δείτε τις λεπτομέρειες του αγώνα και να συμμετέχετε, παρακαλούμε συνδεθείτε.
+                Συνδεθείτε για να δείτε όλες τις λεπτομέρειες του αγώνα και να συμμετέχετε.
               </p>
               <Button 
                 size="lg"
