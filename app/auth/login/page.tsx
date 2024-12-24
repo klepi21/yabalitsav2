@@ -3,8 +3,8 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Button } from "@/components/ui/button";
 import { Trophy, Users, Calendar, MapPin } from "lucide-react";
+import { BouncingBall } from "@/components/ui/bouncing-ball";
 import { useLanguage } from "@/lib/language-context";
-import { SplineBackground } from "@/components/ui/spline-background";
 
 export default function Login() {
   const supabase = createClientComponentClient();
@@ -14,17 +14,18 @@ export default function Login() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://yabalitsav2.vercel.app/auth/callback',
+        redirectTo: `${location.origin}/auth/callback`,
       },
     });
   };
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Hero Section - reduced bottom padding */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 pb-2 text-center">
         <div className="space-y-6 max-w-2xl">
           <div className="flex flex-col items-center">
-            <SplineBackground />
+            <BouncingBall />
             <h1 className="text-4xl font-black tracking-tight mt-4">
               {t('auth.loginTitle')}
               <br />
@@ -64,6 +65,7 @@ export default function Login() {
         </div>
       </div>
 
+      {/* Features Section - reduced top padding */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-muted/50">
         <div className="flex flex-col items-center text-center p-4 space-y-2">
           <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -106,6 +108,7 @@ export default function Login() {
         </div>
       </div>
 
+      {/* Footer */}
       <div className="py-6 text-center text-sm text-muted-foreground bg-background">
         <p>{t('footer.joinCommunity')}</p>
       </div>
