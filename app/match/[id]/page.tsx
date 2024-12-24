@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { MapPin, Users, Clock, Phone, Copy, Share2, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { MapPin, Users, Clock, Phone, Copy, Share2, MessageCircle, ChevronDown, ChevronUp, Map } from "lucide-react";
 import { EuroIcon } from "@/components/icons/euro";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -417,6 +417,9 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
               </p>
             </div>
           </div>
+          <p className="text-sm text-muted-foreground text-center italic">
+            * Κάθε παίκτης πρέπει να πληρώσει το κόστος συμμετοχής του στη γραμματεία του γηπέδου πριν ή μετά τον αγώνα
+          </p>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -440,13 +443,12 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Players</h2>
+              <h2 className="text-xl font-semibold">{t('matches.players')}</h2>
               {match.status !== 'finished' && (isJoined || isHost) && (
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="gap-2">
-                      <MessageCircle className="h-4 w-4" />
-                      Match Chat
+                    <Button variant="outline" size="icon">
+                      <Map className="h-5 w-5" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[500px] p-0">
