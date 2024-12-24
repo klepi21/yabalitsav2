@@ -1,6 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter, Russo_One, Roboto } from 'next/font/google';
+import { Inter, Russo_One, Roboto, Lexend } from 'next/font/google';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 import { MobileLayout } from '@/components/layout/mobile-layout';
@@ -17,6 +17,10 @@ const roboto = Roboto({
   weight: ['400', '700', '900'],
   subsets: ['greek'],
 });
+const lexend = Lexend({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '500', '600', '700'],
+});
 
 export const metadata: Metadata = {
   title: 'FootballHub - Find & Join Football Matches',
@@ -30,7 +34,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="el" suppressHydrationWarning className={russoOne.className}>
-      <body suppressHydrationWarning>
+      <head />
+      <body suppressHydrationWarning className={lexend.className}>
         <LanguageProvider>
           <ThemeProvider
             attribute="class"

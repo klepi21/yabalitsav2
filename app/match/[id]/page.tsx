@@ -573,7 +573,7 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
                     </div>
                   ) : (
                     <Button className="w-full" onClick={handleJoinMatch}>
-                      Join Match
+                      {t('matches.details.join')}
                     </Button>
                   )}
                 </>
