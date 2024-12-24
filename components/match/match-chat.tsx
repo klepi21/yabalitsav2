@@ -89,29 +89,29 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
           filter: `match_id=eq.${matchId}`,
         },
         async (payload) => {
-          // Fetch the complete message data including sender info
-          const { data, error } = await supabase
-            .from('match_chat')
-            .select(`
-              id,
-              message,
-              created_at,
-              sender:profiles!match_chat_sender_id_fkey (
-                full_name,
-                avatar_url
-              )
-            `)
-            .eq('id', payload.new.id)
+          // Get the sender info
+          const { data: senderData, error: senderError } = await supabase
+            .from('profiles')
+            .select('full_name, avatar_url')
+            .eq('id', payload.new.sender_id)
             .single();
 
-          if (error) {
-            console.error('Error fetching new message:', error);
+          if (senderError) {
+            console.error('Error fetching sender:', senderError);
             return;
           }
 
-          if (data) {
-            setMessages(current => [...current, data as unknown as Message]);
-          }
+          const newMessage: Message = {
+            id: payload.new.id,
+            message: payload.new.message,
+            created_at: payload.new.created_at,
+            sender: {
+              full_name: senderData.full_name,
+              avatar_url: senderData.avatar_url
+            }
+          };
+
+          setMessages(current => [...current, newMessage]);
         }
       )
       .subscribe();
