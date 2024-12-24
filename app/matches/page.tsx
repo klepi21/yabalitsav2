@@ -111,7 +111,7 @@ export default function MatchesPage() {
       {todayMatches.length > 0 && (
         <section>
           <h2 className="text-xl font-semibold mb-4">Σημερινοί Αγώνες</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {todayMatches.map(match => (
               <MatchCard
                 key={match.id}
@@ -129,7 +129,7 @@ export default function MatchesPage() {
       {upcomingMatches.length > 0 && (
         <section>
           <h2 className="text-xl font-semibold mb-4">Προσεχείς Αγώνες</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {upcomingMatches.map(match => (
               <MatchCard
                 key={match.id}
