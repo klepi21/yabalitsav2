@@ -42,6 +42,32 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const fetchMessages = async () => {
+    const { data, error } = await supabase
+      .from('match_chat')
+      .select(`
+        id,
+        message,
+        created_at,
+        sender:profiles!match_chat_sender_id_fkey (
+          full_name,
+          avatar_url
+        )
+      `)
+      .eq('match_id', matchId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching messages:', error);
+      return;
+    }
+
+    if (data) {
+      console.log('Messages loaded:', data);
+      setMessages(data as unknown as Message[]);
+    }
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -49,85 +75,39 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
   useEffect(() => {
     if (!isParticipant) return;
 
-    // Fetch existing messages
-    const fetchMessages = async () => {
-      const { data, error } = await supabase
-        .from('match_chat')
-        .select(`
-          id,
-          message,
-          created_at,
-          sender:profiles!match_chat_sender_id_fkey (
-            full_name,
-            avatar_url
-          )
-        `)
-        .eq('match_id', matchId)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching messages:', error);
-        return;
-      }
-
-      if (data) {
-        console.log('Initial messages loaded:', data);
-        setMessages(data as unknown as Message[]);
-      }
-    };
-
-    fetchMessages();
-
-    // Subscribe to new messages
-    const channel = supabase
-      .channel(`match_chat:${matchId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'match_chat',
-          filter: `match_id=eq.${matchId}`,
-        },
-        async (payload) => {
-          console.log('Received real-time update:', payload);
-
-          // Get the sender info
-          const { data: senderData, error: senderError } = await supabase
-            .from('profiles')
-            .select('full_name, avatar_url')
-            .eq('id', payload.new.sender_id)
-            .single();
-
-          if (senderError) {
-            console.error('Error fetching sender:', senderError);
-            return;
+    // Enable realtime
+    const setupSubscription = async () => {
+      await supabase.removeAllChannels();
+      
+      const channel = supabase
+        .channel(`match_chat:${matchId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'match_chat',
+            filter: `match_id=eq.${matchId}`,
+          },
+          async (payload) => {
+            console.log('Received real-time update:', payload);
+            await fetchMessages(); // Refresh messages when we receive an update
           }
+        )
+        .subscribe((status) => {
+          console.log('Chat channel status:', status);
+        });
 
-          console.log('Sender data:', senderData);
+      // Initial fetch
+      await fetchMessages();
 
-          const newMessage: Message = {
-            id: payload.new.id,
-            message: payload.new.message,
-            created_at: payload.new.created_at,
-            sender: {
-              full_name: senderData.full_name,
-              avatar_url: senderData.avatar_url
-            }
-          };
-
-          console.log('Adding new message to state:', newMessage);
-          setMessages(current => [...current, newMessage]);
-        }
-      )
-      .subscribe((status) => {
-        console.log('Chat channel status:', status);
-      });
-
-    return () => {
-      console.log('Cleaning up subscription');
-      channel.unsubscribe();
+      return () => {
+        console.log('Cleaning up subscription');
+        channel.unsubscribe();
+      };
     };
+
+    setupSubscription();
   }, [matchId, isParticipant]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -148,6 +128,7 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
       if (error) throw error;
       console.log('Message sent successfully');
       setNewMessage('');
+      await fetchMessages(); // Refresh messages after sending
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
