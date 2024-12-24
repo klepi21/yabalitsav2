@@ -598,7 +598,7 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
                     </div>
                   ) : (
                     <Button className="w-full" onClick={handleJoinMatch}>
-                      {t('matches.details.join')}
+                      Συμμετοχή
                     </Button>
                   )}
                 </>
