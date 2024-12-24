@@ -417,21 +417,21 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
               </p>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground text-center italic">
+          <p className="text-xs text-muted-foreground mt-1">
             * Κάθε παίκτης πρέπει να πληρώσει το κόστος συμμετοχής του στη γραμματεία του γηπέδου πριν ή μετά τον αγώνα
           </p>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">{t('matches.details.location')}</h2>
-              <a 
-                href={`https://maps.google.com/?q=${match.venue.address}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-primary hover:text-primary"
+                onClick={() => window.open(`https://maps.google.com/?q=${match.venue.address}`, '_blank')}
               >
-                {t('matches.details.openInMaps')}
-              </a>
+                <Map className="h-5 w-5" />
+              </Button>
             </div>
             <div className="p-4 rounded-lg border">
               <p className="font-medium flex items-center gap-2">
@@ -447,8 +447,9 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
               {match.status !== 'finished' && (isJoined || isHost) && (
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <Map className="h-5 w-5" />
+                    <Button variant="outline" className="gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      Match Chat
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[500px] p-0">
