@@ -47,9 +47,6 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
 
   const fetchMatch = async () => {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      if (!currentUser) return;
-
       const { data, error } = await supabase
         .from("matches")
         .select(`
@@ -67,34 +64,34 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
       if (error) throw error;
       setMatch(data);
 
-      // Update isHost and isJoined states
-      setIsHost(data.host_id === currentUser.id);
-      setIsJoined(data.participants.some((p: any) => p.player.id === currentUser.id));
+      // Only set these states if user is authenticated
+      if (user) {
+        setIsHost(data.host_id === user.id);
+        setIsJoined(data.participants.some((p: any) => p.player.id === user.id));
 
-      // Fetch all community ratings at once
-      const playerIds = data.participants.map((p: any) => p.player.id);
-      const { data: ratings } = await supabase
-        .from('match_ratings')
-        .select('rating, rated_player_id')
-        .in('rated_player_id', playerIds);
+        // Fetch community ratings only for authenticated users
+        const playerIds = data.participants.map((p: any) => p.player.id);
+        const { data: ratings } = await supabase
+          .from('match_ratings')
+          .select('rating, rated_player_id')
+          .in('rated_player_id', playerIds);
 
-      // Calculate average ratings
-      const ratingsByPlayer: {[key: string]: number[]} = {};
-      ratings?.forEach((r: any) => {
-        if (!ratingsByPlayer[r.rated_player_id]) {
-          ratingsByPlayer[r.rated_player_id] = [];
-        }
-        ratingsByPlayer[r.rated_player_id].push(r.rating);
-      });
+        const ratingsByPlayer: {[key: string]: number[]} = {};
+        ratings?.forEach((r: any) => {
+          if (!ratingsByPlayer[r.rated_player_id]) {
+            ratingsByPlayer[r.rated_player_id] = [];
+          }
+          ratingsByPlayer[r.rated_player_id].push(r.rating);
+        });
 
-      // Calculate averages
-      const averageRatings: {[key: string]: number} = {};
-      Object.entries(ratingsByPlayer).forEach(([playerId, ratings]) => {
-        const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
-        averageRatings[playerId] = Number(avg.toFixed(1));
-      });
+        const averageRatings: {[key: string]: number} = {};
+        Object.entries(ratingsByPlayer).forEach(([playerId, ratings]) => {
+          const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+          averageRatings[playerId] = Number(avg.toFixed(1));
+        });
 
-      setCommunityRatings(averageRatings);
+        setCommunityRatings(averageRatings);
+      }
     } catch (error) {
       console.error('Error fetching match:', error);
     } finally {
@@ -103,9 +100,7 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchMatch();
-    }
+    fetchMatch();
   }, [params.id, user]);
 
   const handleCancelParticipation = async () => {
