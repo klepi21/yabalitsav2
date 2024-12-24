@@ -141,7 +141,10 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
   }
 
   return (
-    <div className="flex flex-col h-[400px] border rounded-lg">
+    <div className="flex flex-col h-[600px] bg-background">
+      <div className="p-4 border-b">
+        <h2 className="font-semibold">Match Chat</h2>
+      </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
           <div key={message.id} className="flex items-start gap-2">
@@ -152,7 +155,7 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
             <div>
               <div className="flex items-baseline gap-2">
                 <span className="font-medium text-sm">
-                  {message.sender.full_name}
+                  {message.sender.full_name.split(' ')[0]} {message.sender.full_name.split(' ')[1]?.[0]}.
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {format(new Date(message.created_at), 'HH:mm')}

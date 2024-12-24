@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { MapPin, Users, Clock, Phone, Copy, Share2 } from "lucide-react";
+import { MapPin, Users, Clock, Phone, Copy, Share2, MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { EuroIcon } from "@/components/icons/euro";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import { FieldCover } from "@/components/match/field-cover";
 import { useLanguage } from "@/lib/language-context";
 import { formatDateToGreek } from "@/lib/date-utils";
 import { MatchChat } from '@/components/match/match-chat';
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export default function MatchDetails({ params }: { params: { id: string } }) {
   const [match, setMatch] = useState<any>(null);
@@ -34,6 +35,7 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
   const [user, setUser] = useState<any>(null);
   const [communityRatings, setCommunityRatings] = useState<{[key: string]: number}>({});
   const { t } = useLanguage();
+  const [showAllPlayers, setShowAllPlayers] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -356,7 +358,7 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
   // Helper function to format name
   const formatName = (fullName: string) => {
     const [firstName, ...lastNames] = fullName.split(' ');
-    return `${firstName} ${lastNames.map(name => name[0]).join('. ')}.`;
+    return `${firstName} ${lastNames[0]?.[0]}.`;
   };
 
   // Helper function to calculate rating
@@ -374,7 +376,7 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
             <h1 className="text-2xl font-bold">{match.venue.name}</h1>
             <p className="text-muted-foreground flex items-center gap-2">
               <Users className="h-4 w-4" />
-              {t('matches.host')} {match.host.full_name}
+              {t('matches.host')} {formatName(match.host.full_name)}
             </p>
           </div>
           <div className="flex flex-col items-end gap-2 bg-background p-4 rounded-lg shadow-lg">
@@ -439,7 +441,7 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Players</h2>
             <div className="grid gap-3">
-              {match.participants.map((participant: any) => {
+              {match.participants.slice(0, showAllPlayers ? undefined : 5).map((participant: any) => {
                 const selfRating = participant.player.speed && participant.player.pace && participant.player.power
                   ? ((participant.player.speed + participant.player.pace + participant.player.power) / 3).toFixed(1)
                   : null;
@@ -480,7 +482,7 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
                           )}
                         </div>
 
-                        {isHost && participant.player.phone_public && participant.player.phone_number && (
+                        {((isHost || isJoined) && participant.player.phone_public && participant.player.phone_number) && (
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
                             <Phone className="h-3 w-3" />
                             {participant.player.phone_number}
@@ -491,6 +493,25 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
                   </div>
                 );
               })}
+              {match.participants.length > 5 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAllPlayers(!showAllPlayers)}
+                  className="w-full"
+                >
+                  {showAllPlayers ? (
+                    <>
+                      <ChevronUp className="h-4 w-4 mr-2" />
+                      Show Less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4 mr-2" />
+                      Show All Players ({match.participants.length})
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
 
@@ -613,13 +634,23 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
             </div>
           )}
 
-          {match.status !== 'finished' && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Match Chat</h2>
-              <MatchChat 
-                matchId={match.id} 
-                isParticipant={isJoined || isHost}
-              />
+          {match.status !== 'finished' && (isJoined || isHost) && (
+            <div className="flex justify-end mt-4">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <MessageCircle className="h-4 w-4" />
+                    Match Chat
+                    {/* You could add an unread messages badge here if you implement that feature */}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px] p-0">
+                  <MatchChat 
+                    matchId={match.id} 
+                    isParticipant={isJoined || isHost}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           )}
 
