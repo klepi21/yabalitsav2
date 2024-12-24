@@ -1,10 +1,3 @@
 {
-  "/_not-found": "app/_not-found.js",
-  "/page": "app/page.js",
-  "/create/page": "app/create/page.js",
-  "/history/page": "app/history/page.js",
-  "/profile/page": "app/profile/page.js",
-  "/auth/login/page": "app/auth/login/page.js",
-  "/auth/callback/route": "app/auth/callback/route.js",
-  "/match/[id]/page": "app/match/[id]/page.js"
+  "/auth/login/page": "app/auth/login/page.js"
 }

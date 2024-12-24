@@ -18,6 +18,7 @@ import { RatingDisplay } from "@/components/ui/rating-display";
 import { FieldCover } from "@/components/match/field-cover";
 import { useLanguage } from "@/lib/language-context";
 import { formatDateToGreek } from "@/lib/date-utils";
+import { MatchChat } from "@/components/match/match-chat";
 
 export default function MatchDetails({ params }: { params: { id: string } }) {
   const [match, setMatch] = useState<any>(null);
@@ -263,6 +264,15 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
       );
 
       if (!confirmed) return;
+
+      const { error: chatError } = await supabase
+        .from('match_chat')
+        .delete()
+        .eq('match_id', match.id);
+
+      if (chatError) {
+        console.error('Error deleting chat messages:', chatError);
+      }
 
       const { error } = await supabase
         .from('matches')
@@ -664,6 +674,13 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
               <p className="text-lg font-mono tracking-wider text-center bg-background rounded p-2">
                 {match.private_code}
               </p>
+            </div>
+          )}
+
+          {isJoined && match.status !== 'finished' && (
+            <div className="mt-6">
+              <h3 className="font-semibold mb-2">Match Chat</h3>
+              <MatchChat matchId={match.id} />
             </div>
           )}
         </CardContent>
