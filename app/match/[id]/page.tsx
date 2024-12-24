@@ -439,7 +439,25 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Players</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Players</h2>
+              {match.status !== 'finished' && (isJoined || isHost) && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      Match Chat
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px] p-0">
+                    <MatchChat 
+                      matchId={match.id} 
+                      isParticipant={isJoined || isHost}
+                    />
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
             <div className="grid gap-3">
               {match.participants.slice(0, showAllPlayers ? undefined : 5).map((participant: any) => {
                 const selfRating = participant.player.speed && participant.player.pace && participant.player.power
@@ -631,26 +649,6 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
                     })}
                 </div>
               )}
-            </div>
-          )}
-
-          {match.status !== 'finished' && (isJoined || isHost) && (
-            <div className="flex justify-end mt-4">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    <MessageCircle className="h-4 w-4" />
-                    Match Chat
-                    {/* You could add an unread messages badge here if you implement that feature */}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px] p-0">
-                  <MatchChat 
-                    matchId={match.id} 
-                    isParticipant={isJoined || isHost}
-                  />
-                </DialogContent>
-              </Dialog>
             </div>
           )}
 
