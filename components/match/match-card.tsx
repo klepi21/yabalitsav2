@@ -1,19 +1,12 @@
 "use client";
 
 import { format } from "date-fns";
-import { MapPin, Users, Clock, Copy, Share2 } from "lucide-react";
+import { MapPin, Users, Clock, ArrowRight } from "lucide-react";
 import { EuroIcon } from "@/components/icons/euro";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { useLanguage } from "@/lib/language-context";
-import { formatDateToGreek } from "@/lib/date-utils";
-import { formatName } from "@/lib/utils";
-import { getTeamSizes } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface MatchCardProps {
@@ -23,12 +16,20 @@ interface MatchCardProps {
   formatName: (name: string) => string;
 }
 
-export function MatchCard({ match, isJoined, onJoin, formatName }: MatchCardProps) {
+export function MatchCard({ match, isJoined, formatName }: MatchCardProps) {
   const formattedTime = format(new Date(match.match_date), "HH:mm");
   const participantCount = match.participants?.length || 0;
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    router.push(`/match/${match.id}`);
+  };
 
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
+    <Card 
+      className="group hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer" 
+      onClick={handleCardClick}
+    >
       {/* Stylized Field Pattern Cover */}
       <div className="relative h-32">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10">
@@ -94,14 +95,13 @@ export function MatchCard({ match, isJoined, onJoin, formatName }: MatchCardProp
           <span className="truncate">{match.venue.address}</span>
         </div>
 
-        {/* Action Button */}
+        {/* See More Button */}
         <Button 
           className="w-full group-hover:bg-primary transition-colors"
-          variant={isJoined ? "outline" : "default"}
-          onClick={onJoin}
-          disabled={participantCount >= match.max_players && !isJoined}
+          variant="default"
         >
-          {isJoined ? 'Συμμετέχετε' : participantCount >= match.max_players ? 'Πλήρης' : 'Συμμετοχή'}
+          Περισσότερες πληροφορίες
+          <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </CardContent>
     </Card>
