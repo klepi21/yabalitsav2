@@ -344,6 +344,15 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
     }
   };
 
+  const handleSignIn = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.href
+      }
+    });
+  };
+
   if (loading) return <div className="p-4">Loading...</div>;
   if (!match) return <div className="p-4">Match not found</div>;
 
@@ -368,9 +377,26 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 relative">
       <Card className="border-none shadow-none">
         <FieldCover className="rounded-t-lg" />
+        {!user && (
+          <div className="absolute inset-0 backdrop-blur-md z-50 flex flex-col items-center justify-center gap-4 bg-background/50">
+            <div className="text-center space-y-4 p-6 rounded-lg bg-background/80 backdrop-blur shadow-lg max-w-md mx-auto">
+              <h2 className="text-2xl font-bold">Καλώς ήρθατε στο Yabalitsa!</h2>
+              <p className="text-muted-foreground">
+                Για να δείτε τις λεπτομέρειες του αγώνα και να συμμετέχετε, παρακαλούμε συνδεθείτε.
+              </p>
+              <Button 
+                size="lg"
+                className="w-full"
+                onClick={handleSignIn}
+              >
+                Σύνδεση με Google
+              </Button>
+            </div>
+          </div>
+        )}
         <CardHeader className="flex flex-row items-center justify-between pb-2 px-4 -mt-8 relative z-10">
           <div className="bg-background p-4 rounded-lg shadow-lg">
             <h1 className="text-2xl font-bold">{match.venue.name}</h1>

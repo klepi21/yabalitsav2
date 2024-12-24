@@ -23,8 +23,37 @@ const lexend = Lexend({
 });
 
 export const metadata: Metadata = {
-  title: 'FootballHub - Find & Join Football Matches',
-  description: 'Connect with players, join matches, and organize games in your area',
+  title: 'Yabalitsa - Βρες την παρέα σου για μπάλα',
+  description: 'Η Yabalitsa είναι η απόλυτη πλατφόρμα για ποδοσφαιρόφιλους! Οργάνωσε τα παιχνίδια σου, βρες νέες παρέες για μπάλα, και συμμετέχε σε αγώνες στην περιοχή σου. Εύκολα, γρήγορα και διασκεδαστικά!',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png' },
+    ],
+  },
+  openGraph: {
+    title: 'Yabalitsa - Βρες την παρέα σου για μπάλα',
+    description: 'Η απόλυτη πλατφόρμα για ποδοσφαιρόφιλους! Οργάνωσε τα παιχνίδια σου, βρες νέες παρέες για μπάλα.',
+    type: 'website',
+    url: 'https://yabalitsa.com',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Yabalitsa - Organize Football Games',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Yabalitsa - Βρες την παρέα σου για μπάλα',
+    description: 'Η απόλυτη πλατφόρμα για ποδοσφαιρόφιλους! Οργάνωσε τα παιχνίδια σου, βρες νέες παρέες για μπάλα.',
+    images: ['/og-image.png'],
+  },
 };
 
 export default function RootLayout({
