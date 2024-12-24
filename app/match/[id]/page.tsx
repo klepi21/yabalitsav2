@@ -20,7 +20,13 @@ import { useLanguage } from "@/lib/language-context";
 import { formatDateToGreek } from "@/lib/date-utils";
 import { MatchChat } from "@/components/match/match-chat";
 
-export default function MatchDetails({ params }: { params: { id: string } }) {
+interface MatchDetailsProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function MatchDetails({ params }: MatchDetailsProps) {
   const [match, setMatch] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isJoined, setIsJoined] = useState(false);
