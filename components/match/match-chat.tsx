@@ -71,6 +71,7 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
       }
 
       if (data) {
+        console.log('Initial messages loaded:', data);
         setMessages(data as unknown as Message[]);
       }
     };
@@ -83,12 +84,15 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'match_chat',
           filter: `match_id=eq.${matchId}`,
         },
         async (payload) => {
+          console.log('Received real-time update:', payload);
+          if (payload.eventType !== 'INSERT') return;
+
           // Get the sender info
           const { data: senderData, error: senderError } = await supabase
             .from('profiles')
@@ -101,6 +105,8 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
             return;
           }
 
+          console.log('Sender data:', senderData);
+
           const newMessage: Message = {
             id: payload.new.id,
             message: payload.new.message,
@@ -111,12 +117,25 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
             }
           };
 
+          console.log('Adding new message to state:', newMessage);
           setMessages(current => [...current, newMessage]);
         }
-      )
-      .subscribe();
+      );
+
+    // Enable realtime
+    supabase.channel('custom-all-channel').subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        console.log('Subscribed to realtime updates');
+      }
+    });
+
+    // Subscribe to the chat channel
+    channel.subscribe((status) => {
+      console.log('Chat channel status:', status);
+    });
 
     return () => {
+      console.log('Cleaning up subscription');
       supabase.removeChannel(channel);
     };
   }, [matchId, isParticipant]);
@@ -127,15 +146,17 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
 
     setLoading(true);
     try {
+      const { data: userData } = await supabase.auth.getUser();
       const { error } = await supabase
         .from('match_chat')
         .insert({
           match_id: matchId,
           message: newMessage.trim(),
-          sender_id: (await supabase.auth.getUser()).data.user?.id,
+          sender_id: userData.user?.id,
         });
 
       if (error) throw error;
+      console.log('Message sent successfully');
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
