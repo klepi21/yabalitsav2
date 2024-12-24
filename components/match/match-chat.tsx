@@ -84,14 +84,13 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'match_chat',
           filter: `match_id=eq.${matchId}`,
         },
         async (payload) => {
           console.log('Received real-time update:', payload);
-          if (payload.eventType !== 'INSERT') return;
 
           // Get the sender info
           const { data: senderData, error: senderError } = await supabase
@@ -120,23 +119,14 @@ export function MatchChat({ matchId, isParticipant }: MatchChatProps) {
           console.log('Adding new message to state:', newMessage);
           setMessages(current => [...current, newMessage]);
         }
-      );
-
-    // Enable realtime
-    supabase.channel('custom-all-channel').subscribe(async (status) => {
-      if (status === 'SUBSCRIBED') {
-        console.log('Subscribed to realtime updates');
-      }
-    });
-
-    // Subscribe to the chat channel
-    channel.subscribe((status) => {
-      console.log('Chat channel status:', status);
-    });
+      )
+      .subscribe((status) => {
+        console.log('Chat channel status:', status);
+      });
 
     return () => {
       console.log('Cleaning up subscription');
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, [matchId, isParticipant]);
 
