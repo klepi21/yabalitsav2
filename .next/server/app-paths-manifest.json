@@ -1,10 +1,10 @@
 {
   "/_not-found": "app/_not-found.js",
   "/page": "app/page.js",
-  "/history/page": "app/history/page.js",
   "/create/page": "app/create/page.js",
-  "/matches/page": "app/matches/page.js",
+  "/history/page": "app/history/page.js",
   "/profile/page": "app/profile/page.js",
+  "/matches/page": "app/matches/page.js",
   "/auth/callback/route": "app/auth/callback/route.js",
   "/auth/login/page": "app/auth/login/page.js",
   "/match/[id]/page": "app/match/[id]/page.js"

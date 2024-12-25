@@ -185,24 +185,6 @@ export default function ProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Handle notification subscription
-      let notificationSuccess = true;
-      if (values.notifications_enabled) {
-        notificationSuccess = await subscribeToNotifications();
-        if (!notificationSuccess) {
-          // If subscription failed, update the form state
-          form.setValue('notifications_enabled', false);
-          toast({
-            title: "Notification Error",
-            description: "Failed to enable notifications. Please check your browser settings.",
-            variant: "destructive",
-          });
-          return;
-        }
-      } else {
-        await unsubscribeFromNotifications();
-      }
-
       // Check if username is already taken
       const { data: existingUsers, error: checkError } = await supabase
         .from('profiles')
@@ -226,7 +208,6 @@ export default function ProfilePage() {
           username: values.username,
           phone_number: values.phone_number,
           phone_public: values.phone_public,
-          notifications_enabled: notificationSuccess && values.notifications_enabled,
           speed: values.speed,
           pace: values.pace,
           power: values.power,
@@ -366,6 +347,8 @@ export default function ProfilePage() {
                       <Switch
                         checked={field.value}
                         onCheckedChange={async (checked) => {
+                          if (!profile?.id) return;
+                          
                           try {
                             if (checked) {
                               const success = await subscribeToNotifications();
@@ -378,23 +361,35 @@ export default function ProfilePage() {
                                   .eq('id', profile.id);
                                   
                                 if (error) throw error;
+                                
+                                toast({
+                                  title: "Success",
+                                  description: "Notifications enabled successfully",
+                                });
                               } else {
                                 toast({
                                   title: "Notification Error",
-                                  description: "Failed to enable notifications. Please check your browser settings.",
+                                  description: "Failed to enable notifications. Please check your browser settings and try again.",
                                   variant: "destructive",
                                 });
                               }
                             } else {
-                              await unsubscribeFromNotifications();
-                              field.onChange(false);
-                              // Update the database immediately when unsubscribing
-                              const { error } = await supabase
-                                .from('profiles')
-                                .update({ notifications_enabled: false })
-                                .eq('id', profile.id);
+                              const success = await unsubscribeFromNotifications();
+                              if (success) {
+                                field.onChange(false);
+                                // Update the database immediately when unsubscribing
+                                const { error } = await supabase
+                                  .from('profiles')
+                                  .update({ notifications_enabled: false })
+                                  .eq('id', profile.id);
+                                  
+                                if (error) throw error;
                                 
-                              if (error) throw error;
+                                toast({
+                                  title: "Success",
+                                  description: "Notifications disabled successfully",
+                                });
+                              }
                             }
                           } catch (error) {
                             console.error('Error updating notification settings:', error);

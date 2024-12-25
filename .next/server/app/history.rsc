@@ -6,7 +6,7 @@
 6:HL["/_next/static/media/d602976d04712c39-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 7:HL["/_next/static/media/faa7e13632bbe29e-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 8:HL["/_next/static/css/f5573f8ca2b2752d.css","style"]
-0:["gKG7XKbwp6nPjz7uKNMeo",[[["",{"children":["history",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],"$L9",[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/f5573f8ca2b2752d.css","precedence":"next"}]],"$La"]]]]
+0:["mTUSyrlIkdXA76_PXkgMZ",[[["",{"children":["history",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],"$L9",[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/f5573f8ca2b2752d.css","precedence":"next"}]],"$La"]]]]
 b:I{"id":9853,"chunks":["952:static/chunks/952-3ceba2a5e5709e18.js","350:static/chunks/350-202ab518810c4ab3.js","185:static/chunks/app/layout-412e30e2cc07fbb3.js"],"name":"LanguageProvider","async":false}
 c:I{"id":4657,"chunks":["952:static/chunks/952-3ceba2a5e5709e18.js","350:static/chunks/350-202ab518810c4ab3.js","185:static/chunks/app/layout-412e30e2cc07fbb3.js"],"name":"ThemeProvider","async":false}
 d:I{"id":4643,"chunks":["952:static/chunks/952-3ceba2a5e5709e18.js","350:static/chunks/350-202ab518810c4ab3.js","185:static/chunks/app/layout-412e30e2cc07fbb3.js"],"name":"FootballPattern","async":false}

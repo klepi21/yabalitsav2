@@ -32,13 +32,19 @@ export const initializeOneSignal = async () => {
     }
 
     await OneSignal.init(config);
+
+    // Check if service worker is registered
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration();
+      console.log('Service Worker registration:', registration);
+    }
   } catch (error) {
     console.error('Error initializing OneSignal:', error);
   }
 };
 
 // Subscribe user to notifications
-export const subscribeToNotifications = async () => {
+export const subscribeToNotifications = async (): Promise<boolean> => {
   try {
     // First check if we already have permission
     const currentPermission = await OneSignal.Notifications.permission;
@@ -63,7 +69,11 @@ export const subscribeToNotifications = async () => {
     const isSubscribed = await OneSignal.User.PushSubscription.optedIn;
     console.log('Is subscribed:', isSubscribed);
     
-    return isSubscribed;
+    // Double check browser permission
+    const browserPermission = await OneSignal.Notifications.permission;
+    console.log('Final browser permission:', browserPermission);
+
+    return Boolean(isSubscribed && browserPermission);
   } catch (error) {
     console.error('Error subscribing to notifications:', error);
     return false;
@@ -71,7 +81,7 @@ export const subscribeToNotifications = async () => {
 };
 
 // Unsubscribe user from notifications
-export const unsubscribeFromNotifications = async () => {
+export const unsubscribeFromNotifications = async (): Promise<boolean> => {
   try {
     await OneSignal.User.PushSubscription.optOut();
     const isSubscribed = await OneSignal.User.PushSubscription.optedIn;
@@ -84,7 +94,7 @@ export const unsubscribeFromNotifications = async () => {
 };
 
 // Get current subscription status
-export const getNotificationStatus = async () => {
+export const getNotificationStatus = async (): Promise<'granted' | 'denied'> => {
   try {
     const permission = await OneSignal.Notifications.permission;
     const isPushEnabled = await OneSignal.User.PushSubscription.optedIn;
@@ -97,9 +107,10 @@ export const getNotificationStatus = async () => {
 };
 
 // Set external user ID for targeting
-export const setExternalUserId = async (userId: string) => {
+export const setExternalUserId = async (userId: string): Promise<void> => {
   try {
     await OneSignal.login(userId);
+    console.log('External user ID set:', userId);
   } catch (error) {
     console.error('Error setting external user ID:', error);
   }
