@@ -6,7 +6,29 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { FormDescription } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+  username: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(20, "Username must be less than 20 characters")
+    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers and underscores"),
+  phone_number: z.string().optional(),
+  phone_public: z.boolean().default(false),
+  speed: z.number().min(1).max(5),
+  pace: z.number().min(1).max(5),
+  power: z.number().min(1).max(5),
+});
 
 interface ProfileFormProps {
   user: any;
@@ -15,101 +37,140 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ user, onSave, onCancel }: ProfileFormProps) {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const data = Object.fromEntries(formData);
-    onSave({
-      ...data,
-      phone_public: formData.get('phone_public') === 'on',
-      speed: parseInt(formData.get('speed') as string),
-      pace: parseInt(formData.get('pace') as string),
-      power: parseInt(formData.get('power') as string),
-    });
-  };
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: user?.username || "",
+      phone_number: user?.phone_number || "",
+      phone_public: user?.phone_public || false,
+      speed: user?.speed || 3,
+      pace: user?.pace || 3,
+      power: user?.power || 3,
+    },
+  });
 
   return (
     <Card>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-6 pt-6">
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input 
-              id="username" 
-              name="username" 
-              defaultValue={user?.username} 
-              required 
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSave)}>
+          <CardContent className="space-y-6 pt-6">
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone_number">Τηλέφωνο</Label>
-            <Input 
-              id="phone_number" 
-              name="phone_number" 
-              defaultValue={user?.phone_number} 
-              type="tel"
+            <FormField
+              control={form.control}
+              name="phone_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Τηλέφωνο</FormLabel>
+                  <FormControl>
+                    <Input type="tel" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <Label>Εμφάνιση τηλεφώνου</Label>
-              <FormDescription>
-                Επιτρέψτε στους άλλους παίκτες να δουν το τηλέφωνό σας
-              </FormDescription>
-            </div>
-            <Switch 
+            <FormField
+              control={form.control}
               name="phone_public"
-              defaultChecked={user?.phone_public}
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel>Εμφάνιση τηλεφώνου</FormLabel>
+                    <FormDescription>
+                      Επιτρέψτε στους άλλους παίκτες να δουν το τηλέφωνό σας
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Ταχύτητα ({user?.speed || 3})</Label>
-              <Slider
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
                 name="speed"
-                min={1}
-                max={5}
-                step={1}
-                defaultValue={[user?.speed || 3]}
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Ταχύτητα ({field.value})</FormLabel>
+                    <FormControl>
+                      <Slider
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={[field.value]}
+                        onValueChange={([value]) => field.onChange(value)}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="space-y-2">
-              <Label>Αντοχή ({user?.pace || 3})</Label>
-              <Slider
+              <FormField
+                control={form.control}
                 name="pace"
-                min={1}
-                max={5}
-                step={1}
-                defaultValue={[user?.pace || 3]}
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Αντοχή ({field.value})</FormLabel>
+                    <FormControl>
+                      <Slider
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={[field.value]}
+                        onValueChange={([value]) => field.onChange(value)}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="space-y-2">
-              <Label>Δύναμη ({user?.power || 3})</Label>
-              <Slider
+              <FormField
+                control={form.control}
                 name="power"
-                min={1}
-                max={5}
-                step={1}
-                defaultValue={[user?.power || 3]}
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Δύναμη ({field.value})</FormLabel>
+                    <FormControl>
+                      <Slider
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={[field.value]}
+                        onValueChange={([value]) => field.onChange(value)}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
-        </CardContent>
+          </CardContent>
 
-        <CardFooter className="flex justify-end gap-2">
-          <Button variant="outline" type="button" onClick={onCancel}>
-            Ακύρωση
-          </Button>
-          <Button type="submit">
-            Αποθήκευση
-          </Button>
-        </CardFooter>
-      </form>
+          <CardFooter className="flex justify-end gap-2">
+            <Button variant="outline" type="button" onClick={onCancel}>
+              Ακύρωση
+            </Button>
+            <Button type="submit">
+              Αποθήκευση
+            </Button>
+          </CardFooter>
+        </form>
+      </Form>
     </Card>
   );
 } 
