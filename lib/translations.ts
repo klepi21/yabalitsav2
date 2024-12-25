@@ -65,6 +65,8 @@ export const translations = {
       },
       sharePhone: "Κοινοποίηση Τηλεφώνου",
       sharePhoneDesc: "Επιτρέψτε στους διοργανωτές να βλέπουν το τηλέφωνό σας",
+      emailNotifications: "Ειδοποιήσεις Email",
+      emailNotificationsDesc: "Θέλετε να λαμβάνετε ειδοποιήσεις όταν δημιουργούνται νέοι αγώνες;",
       playerRatings: "Αξιολογήσεις Παίκτη",
       speed: "Ταχύτητα",
       pace: "Ρυθμός",
