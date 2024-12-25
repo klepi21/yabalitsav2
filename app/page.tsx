@@ -86,7 +86,7 @@ export default function Home() {
             onClick={() => router.push('/matches')}
             className="text-primary hover:underline"
           >
-            Δείτε όλους
+            Περισσότεροι αγώνες
           </button>
         </div>
         {matches.length === 0 ? (

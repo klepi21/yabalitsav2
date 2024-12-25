@@ -9,7 +9,7 @@ module.exports = require("node:buffer");
 
 /***/ }),
 
-/***/ 413:
+/***/ 19:
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -18,7 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, {
-  "default": () => (/* binding */ next_middleware_loaderabsolutePagePath_private_next_root_dir_2Fmiddleware_ts_page_2Fmiddleware_rootDir_2FUsers_2Fkonstantinoslepidas_2FDesktop_2Ffootball_matchers_W3sicmVnZXhwIjoiXig_2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg_2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSkoLmpzb24pP1tcXC8jXFw_2FXT8kIiwib3JpZ2luYWxTb3VyY2UiOiIvKCg_2FIV9uZXh0L3N0YXRpY3xfbmV4dC9pbWFnZXxmYXZpY29uLmljb3wuKlxcLig_2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikifV0_3D_preferredRegion_middlewareConfig_eyJtYXRjaGVycyI6W3sicmVnZXhwIjoiXig_2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg_2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSkoLmpzb24pP1tcXC8jXFw_2FXT8kIiwib3JpZ2luYWxTb3VyY2UiOiIvKCg_2FIV9uZXh0L3N0YXRpY3xfbmV4dC9pbWFnZXxmYXZpY29uLmljb3wuKlxcLig_2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikifV19_)
+  "default": () => (/* binding */ next_middleware_loaderabsolutePagePath_private_next_root_dir_2Fmiddleware_ts_page_2Fmiddleware_rootDir_2FUsers_2Fkonstantinoslepidas_2FDesktop_2Ffootball_matchers_W3sicmVnZXhwIjoiXig_2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg_2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfGFwaXwuKlxcLig_2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikpKC5qc29uKT9bXFwvI1xcP10_2FJCIsIm9yaWdpbmFsU291cmNlIjoiLygoPyFfbmV4dC9zdGF0aWN8X25leHQvaW1hZ2V8ZmF2aWNvbi5pY298YXBpfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSJ9XQ_3D_3D_preferredRegion_middlewareConfig_eyJtYXRjaGVycyI6W3sicmVnZXhwIjoiXig_2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg_2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfGFwaXwuKlxcLig_2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikpKC5qc29uKT9bXFwvI1xcP10_2FJCIsIm9yaWdpbmFsU291cmNlIjoiLygoPyFfbmV4dC9zdGF0aWN8X25leHQvaW1hZ2V8ZmF2aWNvbi5pY298YXBpfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSJ9XX0_3D_)
 });
 
 // NAMESPACE OBJECT: ./middleware.ts
@@ -2051,23 +2051,41 @@ async function middleware(req) {
         res
     });
     const { data: { session } } = await supabase.auth.getSession();
-    // Allow access to match pages even without authentication
-    if (req.nextUrl.pathname.startsWith("/match/")) {
-        return res;
+    // List of public paths that don't require authentication
+    const publicPaths = [
+        "/",
+        "/login",
+        "/auth/callback",
+        "/auth/login"
+    ];
+    const isPublicPath = publicPaths.some((path)=>req.nextUrl.pathname.startsWith(path));
+    // If the user is not signed in and the path requires auth, redirect to login
+    if (!session && !isPublicPath) {
+        const redirectUrl = new URL("/login", req.url);
+        redirectUrl.searchParams.set("redirectTo", req.nextUrl.pathname);
+        return NextResponse.redirect(redirectUrl);
     }
-    // Require authentication for other pages
-    if (!session) {
+    // If the user is signed in and trying to access login page, redirect to home
+    if (session && req.nextUrl.pathname === "/login") {
         return NextResponse.redirect(new URL("/", req.url));
     }
     return res;
 }
+// Specify which routes should be processed by the middleware
 const config = {
     matcher: [
-        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"
+        /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     * - api routes
+     */ "/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"
     ]
 };
 
-;// CONCATENATED MODULE: ./node_modules/next/dist/build/webpack/loaders/next-middleware-loader.js?absolutePagePath=private-next-root-dir%2Fmiddleware.ts&page=%2Fmiddleware&rootDir=%2FUsers%2Fkonstantinoslepidas%2FDesktop%2Ffootball&matchers=W3sicmVnZXhwIjoiXig%2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg%2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSkoLmpzb24pP1tcXC8jXFw%2FXT8kIiwib3JpZ2luYWxTb3VyY2UiOiIvKCg%2FIV9uZXh0L3N0YXRpY3xfbmV4dC9pbWFnZXxmYXZpY29uLmljb3wuKlxcLig%2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikifV0%3D&preferredRegion=&middlewareConfig=eyJtYXRjaGVycyI6W3sicmVnZXhwIjoiXig%2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg%2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSkoLmpzb24pP1tcXC8jXFw%2FXT8kIiwib3JpZ2luYWxTb3VyY2UiOiIvKCg%2FIV9uZXh0L3N0YXRpY3xfbmV4dC9pbWFnZXxmYXZpY29uLmljb3wuKlxcLig%2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikifV19!
+;// CONCATENATED MODULE: ./node_modules/next/dist/build/webpack/loaders/next-middleware-loader.js?absolutePagePath=private-next-root-dir%2Fmiddleware.ts&page=%2Fmiddleware&rootDir=%2FUsers%2Fkonstantinoslepidas%2FDesktop%2Ffootball&matchers=W3sicmVnZXhwIjoiXig%2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg%2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfGFwaXwuKlxcLig%2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikpKC5qc29uKT9bXFwvI1xcP10%2FJCIsIm9yaWdpbmFsU291cmNlIjoiLygoPyFfbmV4dC9zdGF0aWN8X25leHQvaW1hZ2V8ZmF2aWNvbi5pY298YXBpfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSJ9XQ%3D%3D&preferredRegion=&middlewareConfig=eyJtYXRjaGVycyI6W3sicmVnZXhwIjoiXig%2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg%2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfGFwaXwuKlxcLig%2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikpKC5qc29uKT9bXFwvI1xcP10%2FJCIsIm9yaWdpbmFsU291cmNlIjoiLygoPyFfbmV4dC9zdGF0aWN8X25leHQvaW1hZ2V8ZmF2aWNvbi5pY298YXBpfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSJ9XX0%3D!
 
         
         
@@ -2080,7 +2098,7 @@ const config = {
           throw new Error('The Middleware "pages/middleware" must export a `middleware` or a `default` function');
         }
 
-        /* harmony default export */ function next_middleware_loaderabsolutePagePath_private_next_root_dir_2Fmiddleware_ts_page_2Fmiddleware_rootDir_2FUsers_2Fkonstantinoslepidas_2FDesktop_2Ffootball_matchers_W3sicmVnZXhwIjoiXig_2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg_2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSkoLmpzb24pP1tcXC8jXFw_2FXT8kIiwib3JpZ2luYWxTb3VyY2UiOiIvKCg_2FIV9uZXh0L3N0YXRpY3xfbmV4dC9pbWFnZXxmYXZpY29uLmljb3wuKlxcLig_2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikifV0_3D_preferredRegion_middlewareConfig_eyJtYXRjaGVycyI6W3sicmVnZXhwIjoiXig_2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg_2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSkoLmpzb24pP1tcXC8jXFw_2FXT8kIiwib3JpZ2luYWxTb3VyY2UiOiIvKCg_2FIV9uZXh0L3N0YXRpY3xfbmV4dC9pbWFnZXxmYXZpY29uLmljb3wuKlxcLig_2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikifV19_(opts) {
+        /* harmony default export */ function next_middleware_loaderabsolutePagePath_private_next_root_dir_2Fmiddleware_ts_page_2Fmiddleware_rootDir_2FUsers_2Fkonstantinoslepidas_2FDesktop_2Ffootball_matchers_W3sicmVnZXhwIjoiXig_2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg_2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfGFwaXwuKlxcLig_2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikpKC5qc29uKT9bXFwvI1xcP10_2FJCIsIm9yaWdpbmFsU291cmNlIjoiLygoPyFfbmV4dC9zdGF0aWN8X25leHQvaW1hZ2V8ZmF2aWNvbi5pY298YXBpfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSJ9XQ_3D_3D_preferredRegion_middlewareConfig_eyJtYXRjaGVycyI6W3sicmVnZXhwIjoiXig_2FOlxcLyhfbmV4dFxcL2RhdGFcXC9bXi9dezEsfSkpPyg_2FOlxcLygoPyFfbmV4dFxcL3N0YXRpY3xfbmV4dFxcL2ltYWdlfGZhdmljb24uaWNvfGFwaXwuKlxcLig_2FOnN2Z3xwbmd8anBnfGpwZWd8Z2lmfHdlYnApJCkuKikpKC5qc29uKT9bXFwvI1xcP10_2FJCIsIm9yaWdpbmFsU291cmNlIjoiLygoPyFfbmV4dC9zdGF0aWN8X25leHQvaW1hZ2V8ZmF2aWNvbi5pY298YXBpfC4qXFwuKD86c3ZnfHBuZ3xqcGd8anBlZ3xnaWZ8d2VicCkkKS4qKSJ9XX0_3D_(opts) {
           return adapter({
             ...opts,
             page: "/middleware",
@@ -11579,7 +11597,7 @@ cookie/index.js:
 },
 /******/ __webpack_require__ => { // webpackRuntimeModules
 /******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-/******/ var __webpack_exports__ = (__webpack_exec__(413));
+/******/ var __webpack_exports__ = (__webpack_exec__(19));
 /******/ (_ENTRIES = typeof _ENTRIES === "undefined" ? {} : _ENTRIES).middleware_middleware = __webpack_exports__;
 /******/ }
 ]);

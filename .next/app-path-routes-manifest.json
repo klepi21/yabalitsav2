@@ -1,11 +1,11 @@
 {
   "/_not-found": "/_not-found",
   "/page": "/",
+  "/create/page": "/create",
   "/history/page": "/history",
   "/matches/page": "/matches",
   "/profile/page": "/profile",
-  "/create/page": "/create",
-  "/auth/login/page": "/auth/login",
   "/auth/callback/route": "/auth/callback",
+  "/auth/login/page": "/auth/login",
   "/match/[id]/page": "/match/[id]"
 }
