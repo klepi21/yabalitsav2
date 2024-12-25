@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { FormDescription } from "@/components/ui/form";
 
 interface ProfileFormProps {
   user: any;
@@ -17,7 +19,13 @@ export function ProfileForm({ user, onSave, onCancel }: ProfileFormProps) {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData);
-    onSave(data);
+    onSave({
+      ...data,
+      phone_public: formData.get('phone_public') === 'on',
+      speed: parseInt(formData.get('speed') as string),
+      pace: parseInt(formData.get('pace') as string),
+      power: parseInt(formData.get('power') as string),
+    });
   };
 
   return (
@@ -25,11 +33,11 @@ export function ProfileForm({ user, onSave, onCancel }: ProfileFormProps) {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-6 pt-6">
           <div className="space-y-2">
-            <Label htmlFor="full_name">Ονοματεπώνυμο</Label>
+            <Label htmlFor="username">Username</Label>
             <Input 
-              id="full_name" 
-              name="full_name" 
-              defaultValue={user?.full_name} 
+              id="username" 
+              name="username" 
+              defaultValue={user?.username} 
               required 
             />
           </div>
@@ -44,32 +52,52 @@ export function ProfileForm({ user, onSave, onCancel }: ProfileFormProps) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="position">Θέση</Label>
-            <Select name="position" defaultValue={user?.position || ""}>
-              <SelectTrigger>
-                <SelectValue placeholder="Επιλέξτε θέση" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="goalkeeper">Τερματοφύλακας</SelectItem>
-                <SelectItem value="defender">Αμυντικός</SelectItem>
-                <SelectItem value="midfielder">Μέσος</SelectItem>
-                <SelectItem value="forward">Επιθετικός</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <Label>Εμφάνιση τηλεφώνου</Label>
+              <FormDescription>
+                Επιτρέψτε στους άλλους παίκτες να δουν το τηλέφωνό σας
+              </FormDescription>
+            </div>
+            <Switch 
+              name="phone_public"
+              defaultChecked={user?.phone_public}
+            />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="self_rating">Αυτοαξιολόγηση (1-10)</Label>
-            <Input 
-              id="self_rating" 
-              name="self_rating" 
-              type="number" 
-              min="1" 
-              max="10" 
-              step="0.5"
-              defaultValue={user?.self_rating || "5"} 
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Ταχύτητα ({user?.speed || 3})</Label>
+              <Slider
+                name="speed"
+                min={1}
+                max={5}
+                step={1}
+                defaultValue={[user?.speed || 3]}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Αντοχή ({user?.pace || 3})</Label>
+              <Slider
+                name="pace"
+                min={1}
+                max={5}
+                step={1}
+                defaultValue={[user?.pace || 3]}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Δύναμη ({user?.power || 3})</Label>
+              <Slider
+                name="power"
+                min={1}
+                max={5}
+                step={1}
+                defaultValue={[user?.power || 3]}
+              />
+            </div>
           </div>
         </CardContent>
 
