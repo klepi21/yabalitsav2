@@ -47,10 +47,10 @@ export function WeatherInfo({ date }: WeatherInfoProps) {
   }
 
   const getWeatherIcon = () => {
-    if (weather.condition.toLowerCase().includes('rain')) {
+    if (weather.condition.toLowerCase().includes('βροχή') || weather.condition.toLowerCase().includes('ψιχάλα')) {
       return <CloudRain className="h-5 w-5 text-blue-500" />;
     }
-    if (weather.condition.toLowerCase().includes('cloud')) {
+    if (weather.condition.toLowerCase().includes('συννεφ')) {
       return <Cloud className="h-5 w-5 text-gray-500" />;
     }
     return <Sun className="h-5 w-5 text-yellow-500" />;
@@ -67,7 +67,7 @@ export function WeatherInfo({ date }: WeatherInfoProps) {
         <div className="text-sm text-muted-foreground">
           {weather.condition}
           {weather.precipitation > 20 && (
-            <span className="ml-2">({weather.precipitation}% βροχή)</span>
+            <span className="ml-2">({weather.precipitation}% πιθανότητα βροχής)</span>
           )}
         </div>
       </div>

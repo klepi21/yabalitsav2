@@ -9,23 +9,23 @@ export async function getWeatherForecast(date: Date) {
   );
   const data = await response.json();
   
-  // Weather codes from Open-Meteo
+  // Weather codes from Open-Meteo (in Greek)
   const weatherCodes: { [key: number]: string } = {
-    0: "Clear sky",
-    1: "Mainly clear",
-    2: "Partly cloudy",
-    3: "Overcast",
-    45: "Foggy",
-    51: "Light drizzle",
-    53: "Moderate drizzle",
-    55: "Dense drizzle",
-    61: "Slight rain",
-    63: "Moderate rain",
-    65: "Heavy rain",
-    71: "Light snow",
-    73: "Moderate snow",
-    75: "Heavy snow",
-    95: "Thunderstorm",
+    0: "Καθαρός ουρανός",
+    1: "Κυρίως καθαρός",
+    2: "Μερικώς συννεφιασμένος",
+    3: "Συννεφιασμένος",
+    45: "Ομιχλώδης",
+    51: "Ασθενής ψιχάλα",
+    53: "Μέτρια ψιχάλα",
+    55: "Έντονη ψιχάλα",
+    61: "Ασθενής βροχή",
+    63: "Μέτρια βροχή",
+    65: "Έντονη βροχή",
+    71: "Ελαφρύ χιόνι",
+    73: "Μέτριο χιόνι",
+    75: "Έντονο χιόνι",
+    95: "Καταιγίδα",
   };
 
   return {
