@@ -96,7 +96,7 @@ export default function ProfilePage() {
             username: profile.username || "",
             phone_number: profile.phone_number || "",
             phone_public: profile.phone_public || false,
-            notifications_enabled: profile.notifications_enabled || false,
+            notifications_enabled: status === 'granted',
             speed: profile.speed || 3,
             pace: profile.pace || 3,
             power: profile.power || 3,
@@ -186,8 +186,19 @@ export default function ProfilePage() {
       if (!user) return;
 
       // Handle notification subscription
+      let notificationSuccess = true;
       if (values.notifications_enabled) {
-        await subscribeToNotifications();
+        notificationSuccess = await subscribeToNotifications();
+        if (!notificationSuccess) {
+          // If subscription failed, update the form state
+          form.setValue('notifications_enabled', false);
+          toast({
+            title: "Notification Error",
+            description: "Failed to enable notifications. Please check your browser settings.",
+            variant: "destructive",
+          });
+          return;
+        }
       } else {
         await unsubscribeFromNotifications();
       }
@@ -215,7 +226,7 @@ export default function ProfilePage() {
           username: values.username,
           phone_number: values.phone_number,
           phone_public: values.phone_public,
-          notifications_enabled: values.notifications_enabled,
+          notifications_enabled: notificationSuccess && values.notifications_enabled,
           speed: values.speed,
           pace: values.pace,
           power: values.power,

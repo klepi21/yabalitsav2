@@ -25,9 +25,22 @@ export const initializeOneSignal = async () => {
 // Subscribe user to notifications
 export const subscribeToNotifications = async () => {
   try {
-    await OneSignal.Slidedown.promptPush();
-    const permission = await OneSignal.Notifications.permission;
-    return permission === true;
+    // First check if we already have permission
+    const currentPermission = await OneSignal.Notifications.permission;
+    
+    if (!currentPermission) {
+      // If no permission, show the prompt
+      await OneSignal.Slidedown.promptPush();
+      // Check if permission was granted
+      const newPermission = await OneSignal.Notifications.permission;
+      if (!newPermission) {
+        return false;
+      }
+    }
+
+    // Enable push subscription
+    await OneSignal.User.PushSubscription.optIn();
+    return true;
   } catch (error) {
     console.error('Error subscribing to notifications:', error);
     return false;
@@ -49,7 +62,8 @@ export const unsubscribeFromNotifications = async () => {
 export const getNotificationStatus = async () => {
   try {
     const permission = await OneSignal.Notifications.permission;
-    return permission ? 'granted' : 'denied';
+    const isPushEnabled = await OneSignal.User.PushSubscription.optedIn;
+    return permission && isPushEnabled ? 'granted' : 'denied';
   } catch (error) {
     console.error('Error getting notification status:', error);
     return 'denied';
