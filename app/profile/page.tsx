@@ -346,77 +346,69 @@ export default function ProfilePage() {
                     <FormControl>
                       <Switch
                         checked={field.value}
+                        disabled={false}
                         onCheckedChange={async (checked) => {
                           if (!profile?.id) return;
                           
                           try {
                             if (checked) {
+                              // First update the UI
+                              field.onChange(checked);
+                              
+                              // Then try to enable notifications
                               const success = await subscribeToNotifications();
-                              if (success) {
-                                field.onChange(true);
-                                // Update the database immediately when subscription is successful
-                                const { error } = await supabase
-                                  .from('profiles')
-                                  .update({ notifications_enabled: true })
-                                  .eq('id', profile.id);
-                                  
-                                if (error) throw error;
-                                
-                                toast({
-                                  title: "Success",
-                                  description: "Notifications enabled successfully",
-                                });
-                              } else {
+                              if (!success) {
+                                // If failed, revert the UI
+                                field.onChange(false);
                                 toast({
                                   title: "Notification Error",
                                   description: "Please allow notifications in your browser settings and try again.",
                                   variant: "destructive",
                                 });
+                                return;
                               }
-                            } else {
-                              const success = await unsubscribeFromNotifications();
-                              if (success) {
-                                field.onChange(false);
-                                // Update the database immediately when unsubscribing
-                                const { error } = await supabase
-                                  .from('profiles')
-                                  .update({ notifications_enabled: false })
-                                  .eq('id', profile.id);
-                                  
-                                if (error) throw error;
+
+                              // Update the database
+                              const { error } = await supabase
+                                .from('profiles')
+                                .update({ notifications_enabled: true })
+                                .eq('id', profile.id);
                                 
-                                toast({
-                                  title: "Success",
-                                  description: "Notifications disabled successfully",
-                                });
-                              }
+                              if (error) throw error;
+                              
+                              toast({
+                                title: "Success",
+                                description: "Notifications enabled successfully",
+                              });
+                            } else {
+                              // First update the UI
+                              field.onChange(checked);
+                              
+                              // Then try to disable notifications
+                              await unsubscribeFromNotifications();
+                              
+                              // Update the database
+                              const { error } = await supabase
+                                .from('profiles')
+                                .update({ notifications_enabled: false })
+                                .eq('id', profile.id);
+                                
+                              if (error) throw error;
+                              
+                              toast({
+                                title: "Success",
+                                description: "Notifications disabled successfully",
+                              });
                             }
                           } catch (error) {
                             console.error('Error updating notification settings:', error);
-                            // If OneSignal is blocked, try using browser notifications
-                            if (checked) {
-                              const permission = await Notification.requestPermission();
-                              if (permission === 'granted') {
-                                field.onChange(true);
-                                const { error } = await supabase
-                                  .from('profiles')
-                                  .update({ notifications_enabled: true })
-                                  .eq('id', profile.id);
-                                  
-                                if (error) throw error;
-                                
-                                toast({
-                                  title: "Success",
-                                  description: "Browser notifications enabled successfully",
-                                });
-                              } else {
-                                toast({
-                                  title: "Error",
-                                  description: "Failed to enable notifications. Please check your browser settings.",
-                                  variant: "destructive",
-                                });
-                              }
-                            }
+                            // Revert UI state on error
+                            field.onChange(!checked);
+                            toast({
+                              title: "Error",
+                              description: "Failed to update notification settings",
+                              variant: "destructive",
+                            });
                           }
                         }}
                       />
