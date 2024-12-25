@@ -3,12 +3,15 @@ export interface Profile {
   username: string | null;
   full_name: string | null;
   avatar_url: string | null;
-  skill_level: number | null;
-  telegram_link: string | null;
-  instagram_link: string | null;
-  community_rating: number;
-  total_matches: number;
+  phone_number: string | null;
+  phone_number_visible: boolean;
   email_notifications: boolean;
+  community_rating: number | null;
+  speed: number | null;
+  pace: number | null;
+  power: number | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface Venue {
@@ -17,6 +20,7 @@ export interface Venue {
   address: string;
   capacity: number;
   phone_number: string | null;
+  created_at: string;
 }
 
 export interface Match {

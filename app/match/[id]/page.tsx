@@ -20,6 +20,8 @@ import { useLanguage } from "@/lib/language-context";
 import { formatDateToGreek } from "@/lib/date-utils";
 import { MatchChat } from '@/components/match/match-chat';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { TeamBalancer } from "@/components/match/team-balancer";
+import { WeatherInfo } from "@/components/match/weather-info";
 
 export default function MatchDetails({ params }: { params: { id: string } }) {
   const [match, setMatch] = useState<any>(null);
@@ -439,6 +441,10 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
               </p>
             </div>
           </div>
+
+          {/* Add weather info */}
+          <WeatherInfo date={matchDate} />
+
           <p className="text-xs text-muted-foreground mt-1">
             * Κάθε παίκτης πρέπει να πληρώσει το κόστος συμμετοχής του στη γραμματεία του γηπέδου πριν ή μετά τον αγώνα
           </p>
@@ -614,6 +620,15 @@ export default function MatchDetails({ params }: { params: { id: string } }) {
                 </Button>
               )}
             </>
+          )}
+
+          {isHost && match.status === 'upcoming' && match.participants?.length >= 10 && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Δημιουργία Ομάδων</h2>
+              <TeamBalancer 
+                participants={match.participants.map((p: any) => p.player)} 
+              />
+            </div>
           )}
 
           {isHost && match.status !== 'finished' && canDeleteMatch(participantCount, match.max_players) && (
