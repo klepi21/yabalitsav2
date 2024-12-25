@@ -9,6 +9,21 @@ export const initializeOneSignal = async () => {
         enable: false,
       },
       allowLocalhostAsSecureOrigin: true,
+      promptOptions: {
+        slidedown: {
+          prompts: [
+            {
+              type: "push",
+              autoPrompt: false,
+              text: {
+                actionMessage: "Would you like to receive notifications about new matches?",
+                acceptButton: "Allow",
+                cancelButton: "Cancel",
+              },
+            }
+          ]
+        }
+      }
     };
 
     // Only add Safari Web ID if it exists
@@ -27,12 +42,17 @@ export const subscribeToNotifications = async () => {
   try {
     // First check if we already have permission
     const currentPermission = await OneSignal.Notifications.permission;
+    console.log('Current permission:', currentPermission);
     
     if (!currentPermission) {
       // If no permission, show the prompt
-      await OneSignal.Slidedown.promptPush();
+      const result = await OneSignal.Slidedown.promptPush();
+      console.log('Prompt result:', result);
+      
       // Check if permission was granted
       const newPermission = await OneSignal.Notifications.permission;
+      console.log('New permission:', newPermission);
+      
       if (!newPermission) {
         return false;
       }
@@ -40,7 +60,10 @@ export const subscribeToNotifications = async () => {
 
     // Enable push subscription
     await OneSignal.User.PushSubscription.optIn();
-    return true;
+    const isSubscribed = await OneSignal.User.PushSubscription.optedIn;
+    console.log('Is subscribed:', isSubscribed);
+    
+    return isSubscribed;
   } catch (error) {
     console.error('Error subscribing to notifications:', error);
     return false;
@@ -51,7 +74,9 @@ export const subscribeToNotifications = async () => {
 export const unsubscribeFromNotifications = async () => {
   try {
     await OneSignal.User.PushSubscription.optOut();
-    return true;
+    const isSubscribed = await OneSignal.User.PushSubscription.optedIn;
+    console.log('Is still subscribed:', isSubscribed);
+    return !isSubscribed;
   } catch (error) {
     console.error('Error unsubscribing from notifications:', error);
     return false;
@@ -63,6 +88,7 @@ export const getNotificationStatus = async () => {
   try {
     const permission = await OneSignal.Notifications.permission;
     const isPushEnabled = await OneSignal.User.PushSubscription.optedIn;
+    console.log('Permission:', permission, 'Push enabled:', isPushEnabled);
     return permission && isPushEnabled ? 'granted' : 'denied';
   } catch (error) {
     console.error('Error getting notification status:', error);

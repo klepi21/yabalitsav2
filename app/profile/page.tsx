@@ -365,7 +365,46 @@ export default function ProfilePage() {
                     <FormControl>
                       <Switch
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={async (checked) => {
+                          try {
+                            if (checked) {
+                              const success = await subscribeToNotifications();
+                              if (success) {
+                                field.onChange(true);
+                                // Update the database immediately when subscription is successful
+                                const { error } = await supabase
+                                  .from('profiles')
+                                  .update({ notifications_enabled: true })
+                                  .eq('id', profile.id);
+                                  
+                                if (error) throw error;
+                              } else {
+                                toast({
+                                  title: "Notification Error",
+                                  description: "Failed to enable notifications. Please check your browser settings.",
+                                  variant: "destructive",
+                                });
+                              }
+                            } else {
+                              await unsubscribeFromNotifications();
+                              field.onChange(false);
+                              // Update the database immediately when unsubscribing
+                              const { error } = await supabase
+                                .from('profiles')
+                                .update({ notifications_enabled: false })
+                                .eq('id', profile.id);
+                                
+                              if (error) throw error;
+                            }
+                          } catch (error) {
+                            console.error('Error updating notification settings:', error);
+                            toast({
+                              title: "Error",
+                              description: "Failed to update notification settings",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
                       />
                     </FormControl>
                   </FormItem>
