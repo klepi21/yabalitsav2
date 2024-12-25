@@ -7,7 +7,6 @@ import { MobileLayout } from '@/components/layout/mobile-layout';
 import { Header } from "@/components/header";
 import { LanguageProvider } from '@/lib/language-context';
 import { FootballPattern } from '@/components/ui/football-pattern';
-import { OneSignalProvider } from "@/components/providers/onesignal-provider";
 
 const inter = Inter({ subsets: ['latin'] });
 const russoOne = Russo_One({ 
@@ -64,9 +63,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="el" suppressHydrationWarning className={russoOne.className}>
-      <head>
-        <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-      </head>
+      <head />
       <body suppressHydrationWarning className={lexend.className}>
         <LanguageProvider>
           <ThemeProvider

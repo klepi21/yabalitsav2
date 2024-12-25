@@ -26,7 +26,6 @@ import { RatingDisplay } from "@/components/ui/rating-display";
 import imageCompression from 'browser-image-compression';
 import { Star } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
-import { subscribeToNotifications, unsubscribeFromNotifications, getNotificationStatus } from "@/lib/onesignal";
 
 const formSchema = z.object({
   username: z.string()
@@ -35,7 +34,6 @@ const formSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers and underscores"),
   phone_number: z.string().optional(),
   phone_public: z.boolean().default(false),
-  notifications_enabled: z.boolean().default(false),
   speed: z.number().min(1).max(5),
   pace: z.number().min(1).max(5),
   power: z.number().min(1).max(5),
@@ -46,7 +44,6 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [communityRating, setCommunityRating] = useState<number | null>(null);
-  const [notificationStatus, setNotificationStatus] = useState<string>('default');
   const supabase = createClientComponentClient();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -57,7 +54,6 @@ export default function ProfilePage() {
       username: "",
       phone_number: "",
       phone_public: false,
-      notifications_enabled: false,
       speed: 3,
       pace: 3,
       power: 3,
@@ -80,10 +76,6 @@ export default function ProfilePage() {
           .eq('id', user.id)
           .single();
 
-        // Get notification status
-        const status = await getNotificationStatus();
-        setNotificationStatus(status);
-
         // Fetch all ratings for this user
         const { data: ratings } = await supabase
           .from('match_ratings')
@@ -96,7 +88,6 @@ export default function ProfilePage() {
             username: profile.username || "",
             phone_number: profile.phone_number || "",
             phone_public: profile.phone_public || false,
-            notifications_enabled: status === 'granted',
             speed: profile.speed || 3,
             pace: profile.pace || 3,
             power: profile.power || 3,
@@ -275,7 +266,7 @@ export default function ProfilePage() {
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="username"
@@ -324,93 +315,6 @@ export default function ProfilePage() {
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="notifications_enabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">
-                        Push Notifications
-                      </FormLabel>
-                      <FormDescription>
-                        Receive notifications about new matches
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        disabled={false}
-                        onCheckedChange={async (checked) => {
-                          if (!profile?.id) return;
-                          
-                          try {
-                            if (checked) {
-                              // First update the UI
-                              field.onChange(checked);
-                              
-                              // Then try to enable notifications
-                              const success = await subscribeToNotifications();
-                              if (!success) {
-                                // If failed, revert the UI
-                                field.onChange(false);
-                                toast({
-                                  title: "Notification Error",
-                                  description: "Please allow notifications in your browser settings and try again.",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-
-                              // Update the database
-                              const { error } = await supabase
-                                .from('profiles')
-                                .update({ notifications_enabled: true })
-                                .eq('id', profile.id);
-                                
-                              if (error) throw error;
-                              
-                              toast({
-                                title: "Success",
-                                description: "Notifications enabled successfully",
-                              });
-                            } else {
-                              // First update the UI
-                              field.onChange(checked);
-                              
-                              // Then try to disable notifications
-                              await unsubscribeFromNotifications();
-                              
-                              // Update the database
-                              const { error } = await supabase
-                                .from('profiles')
-                                .update({ notifications_enabled: false })
-                                .eq('id', profile.id);
-                                
-                              if (error) throw error;
-                              
-                              toast({
-                                title: "Success",
-                                description: "Notifications disabled successfully",
-                              });
-                            }
-                          } catch (error) {
-                            console.error('Error updating notification settings:', error);
-                            // Revert UI state on error
-                            field.onChange(!checked);
-                            toast({
-                              title: "Error",
-                              description: "Failed to update notification settings",
-                              variant: "destructive",
-                            });
-                          }
-                        }}
                       />
                     </FormControl>
                   </FormItem>
