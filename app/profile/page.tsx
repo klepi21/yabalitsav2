@@ -37,6 +37,7 @@ const formSchema = z.object({
   speed: z.number().min(1).max(5),
   pace: z.number().min(1).max(5),
   power: z.number().min(1).max(5),
+  email_notifications: z.boolean().default(false),
 });
 
 export default function ProfilePage() {
@@ -57,6 +58,7 @@ export default function ProfilePage() {
       speed: 3,
       pace: 3,
       power: 3,
+      email_notifications: false,
     },
   });
 
@@ -91,6 +93,7 @@ export default function ProfilePage() {
             speed: profile.speed || 3,
             pace: profile.pace || 3,
             power: profile.power || 3,
+            email_notifications: profile.email_notifications || false,
           });
 
           // Calculate average rating if there are any ratings
@@ -202,6 +205,7 @@ export default function ProfilePage() {
           speed: values.speed,
           pace: values.pace,
           power: values.power,
+          email_notifications: values.email_notifications,
         })
         .eq('id', user.id);
 
@@ -309,6 +313,29 @@ export default function ProfilePage() {
                       </FormLabel>
                       <FormDescription>
                         {t('profile.sharePhoneDesc')}
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email_notifications"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">
+                        {t('profile.emailNotifications')}
+                      </FormLabel>
+                      <FormDescription>
+                        {t('profile.emailNotificationsDesc')}
                       </FormDescription>
                     </div>
                     <FormControl>

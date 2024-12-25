@@ -13,7 +13,8 @@ create table public.profiles (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   community_rating decimal(3,2) default 0,
-  total_matches int default 0
+  total_matches int default 0,
+  email_notifications boolean default false
 );
 
 -- Venues table

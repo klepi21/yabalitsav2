@@ -8,6 +8,7 @@ export interface Profile {
   instagram_link: string | null;
   community_rating: number;
   total_matches: number;
+  email_notifications: boolean;
 }
 
 export interface Venue {
