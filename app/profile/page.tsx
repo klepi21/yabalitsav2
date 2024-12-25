@@ -369,7 +369,7 @@ export default function ProfilePage() {
                               } else {
                                 toast({
                                   title: "Notification Error",
-                                  description: "Failed to enable notifications. Please check your browser settings and try again.",
+                                  description: "Please allow notifications in your browser settings and try again.",
                                   variant: "destructive",
                                 });
                               }
@@ -393,11 +393,30 @@ export default function ProfilePage() {
                             }
                           } catch (error) {
                             console.error('Error updating notification settings:', error);
-                            toast({
-                              title: "Error",
-                              description: "Failed to update notification settings",
-                              variant: "destructive",
-                            });
+                            // If OneSignal is blocked, try using browser notifications
+                            if (checked) {
+                              const permission = await Notification.requestPermission();
+                              if (permission === 'granted') {
+                                field.onChange(true);
+                                const { error } = await supabase
+                                  .from('profiles')
+                                  .update({ notifications_enabled: true })
+                                  .eq('id', profile.id);
+                                  
+                                if (error) throw error;
+                                
+                                toast({
+                                  title: "Success",
+                                  description: "Browser notifications enabled successfully",
+                                });
+                              } else {
+                                toast({
+                                  title: "Error",
+                                  description: "Failed to enable notifications. Please check your browser settings.",
+                                  variant: "destructive",
+                                });
+                              }
+                            }
                           }
                         }}
                       />

@@ -10,7 +10,6 @@ export const initializeOneSignal = async () => {
     const config = {
       appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || '',
       serviceWorkerPath: '/OneSignalSDKWorker.js',
-      serviceWorkerParam: { scope: '/push/onesignal/' },
       notifyButton: {
         enable: false,
       },
@@ -35,15 +34,9 @@ export const initializeOneSignal = async () => {
     await OneSignal.init(config);
     isInitialized = true;
     console.log('OneSignal Initialized');
-
-    // Check if service worker is registered
-    if ('serviceWorker' in navigator) {
-      const registration = await navigator.serviceWorker.getRegistration();
-      console.log('Service Worker registration:', registration);
-    }
   } catch (error) {
     console.error('Error initializing OneSignal:', error);
-    throw error;
+    // Don't throw error to prevent app from breaking
   }
 };
 
@@ -54,15 +47,12 @@ export const subscribeToNotifications = async (): Promise<boolean> => {
       await initializeOneSignal();
     }
 
-    // Request browser permission first
-    const permission = await Notification.requestPermission();
-    console.log('Browser permission:', permission);
-    
-    if (permission !== 'granted') {
-      return false;
+    // If OneSignal is blocked or failed to initialize, fall back to browser notifications
+    if (!isInitialized) {
+      const permission = await Notification.requestPermission();
+      return permission === 'granted';
     }
 
-    // Then handle OneSignal subscription
     await OneSignal.User.PushSubscription.optIn();
     const isSubscribed = await OneSignal.User.PushSubscription.optedIn;
     console.log('OneSignal subscription status:', isSubscribed);
@@ -78,7 +68,7 @@ export const subscribeToNotifications = async (): Promise<boolean> => {
 export const unsubscribeFromNotifications = async (): Promise<boolean> => {
   try {
     if (!isInitialized) {
-      await initializeOneSignal();
+      return true; // If OneSignal isn't initialized, consider it as unsubscribed
     }
 
     await OneSignal.User.PushSubscription.optOut();
@@ -87,7 +77,7 @@ export const unsubscribeFromNotifications = async (): Promise<boolean> => {
     return !isSubscribed;
   } catch (error) {
     console.error('Error unsubscribing from notifications:', error);
-    return false;
+    return true; // Return true to allow the UI to update
   }
 };
 
@@ -95,13 +85,13 @@ export const unsubscribeFromNotifications = async (): Promise<boolean> => {
 export const getNotificationStatus = async (): Promise<'granted' | 'denied'> => {
   try {
     if (!isInitialized) {
-      await initializeOneSignal();
+      const browserPermission = Notification.permission;
+      return browserPermission === 'granted' ? 'granted' : 'denied';
     }
 
-    const browserPermission = Notification.permission;
     const isPushEnabled = await OneSignal.User.PushSubscription.optedIn;
-    console.log('Browser permission:', browserPermission, 'Push enabled:', isPushEnabled);
-    return browserPermission === 'granted' && isPushEnabled ? 'granted' : 'denied';
+    console.log('Push enabled:', isPushEnabled);
+    return isPushEnabled ? 'granted' : 'denied';
   } catch (error) {
     console.error('Error getting notification status:', error);
     return 'denied';
@@ -112,7 +102,7 @@ export const getNotificationStatus = async (): Promise<'granted' | 'denied'> => 
 export const setExternalUserId = async (userId: string): Promise<void> => {
   try {
     if (!isInitialized) {
-      await initializeOneSignal();
+      return; // Skip if OneSignal isn't initialized
     }
 
     await OneSignal.login(userId);
