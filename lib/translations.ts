@@ -121,7 +121,8 @@ export const translations = {
       title: "Δημιουργία Νέου Αγώνα",
       venue: {
         label: "Γήπεδο",
-        placeholder: "Επιλέξτε γήπεδο"
+        placeholder: "Επιλέξτε γήπεδο",
+        bookingMessage: "Εάν δεν έχετε κάνει ακόμη κράτηση, καλέστε στο: {phone}"
       },
       date: {
         label: "Ημερομηνία",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,13 +35,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SoccerBall } from "@/components/icons/soccer-ball";
 import { useLanguage } from "@/lib/language-context";
+import { Phone } from "lucide-react";
 
 export default function CreateMatch() {
   const router = useRouter();
   const supabase = createClientComponentClient();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [venues, setVenues] = useState<any[]>([]);
+  const [selectedVenue, setSelectedVenue] = useState<any>(null);
   const { t } = useLanguage();
+
+  useEffect(() => {
+    const fetchVenues = async () => {
+      const { data, error } = await supabase
+        .from('venues')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching venues:', error);
+        return;
+      }
+
+      setVenues(data || []);
+    };
+
+    fetchVenues();
+  }, [supabase]);
 
   const formSchema = z.object({
     venue_id: z.string({
@@ -179,17 +200,34 @@ export default function CreateMatch() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('create.venue.label')}</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        const venue = venues.find(v => v.id === value);
+                        setSelectedVenue(venue);
+                      }} 
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder={t('create.venue.placeholder')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="d290f1ee-6c54-4b01-90e6-d701748f0851">Leontes</SelectItem>
+                        {venues.map((venue) => (
+                          <SelectItem key={venue.id} value={venue.id}>
+                            {venue.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
+                    {selectedVenue?.phone_number && (
+                      <FormDescription className="mt-2 flex items-center gap-2 text-primary">
+                        <Phone className="h-4 w-4" />
+                        {t('create.venue.bookingMessage').replace('{phone}', selectedVenue.phone_number)}
+                      </FormDescription>
+                    )}
                   </FormItem>
                 )}
               />

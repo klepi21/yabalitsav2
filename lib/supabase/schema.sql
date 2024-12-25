@@ -23,6 +23,7 @@ create table public.venues (
   name text not null,
   address text not null,
   capacity int not null,
+  phone_number text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

@@ -16,6 +16,7 @@ export interface Venue {
   name: string;
   address: string;
   capacity: number;
+  phone_number: string | null;
 }
 
 export interface Match {
