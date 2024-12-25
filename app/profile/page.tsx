@@ -26,6 +26,7 @@ import { RatingDisplay } from "@/components/ui/rating-display";
 import imageCompression from 'browser-image-compression';
 import { Star } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
+import { subscribeToNotifications, unsubscribeFromNotifications, getNotificationStatus } from "@/lib/onesignal";
 
 const formSchema = z.object({
   username: z.string()
@@ -34,6 +35,7 @@ const formSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers and underscores"),
   phone_number: z.string().optional(),
   phone_public: z.boolean().default(false),
+  notifications_enabled: z.boolean().default(false),
   speed: z.number().min(1).max(5),
   pace: z.number().min(1).max(5),
   power: z.number().min(1).max(5),
@@ -44,6 +46,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [communityRating, setCommunityRating] = useState<number | null>(null);
+  const [notificationStatus, setNotificationStatus] = useState<string>('default');
   const supabase = createClientComponentClient();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -54,6 +57,7 @@ export default function ProfilePage() {
       username: "",
       phone_number: "",
       phone_public: false,
+      notifications_enabled: false,
       speed: 3,
       pace: 3,
       power: 3,
@@ -76,6 +80,10 @@ export default function ProfilePage() {
           .eq('id', user.id)
           .single();
 
+        // Get notification status
+        const status = await getNotificationStatus();
+        setNotificationStatus(status);
+
         // Fetch all ratings for this user
         const { data: ratings } = await supabase
           .from('match_ratings')
@@ -88,6 +96,7 @@ export default function ProfilePage() {
             username: profile.username || "",
             phone_number: profile.phone_number || "",
             phone_public: profile.phone_public || false,
+            notifications_enabled: profile.notifications_enabled || false,
             speed: profile.speed || 3,
             pace: profile.pace || 3,
             power: profile.power || 3,
@@ -176,6 +185,13 @@ export default function ProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Handle notification subscription
+      if (values.notifications_enabled) {
+        await subscribeToNotifications();
+      } else {
+        await unsubscribeFromNotifications();
+      }
+
       // Check if username is already taken
       const { data: existingUsers, error: checkError } = await supabase
         .from('profiles')
@@ -199,6 +215,7 @@ export default function ProfilePage() {
           username: values.username,
           phone_number: values.phone_number,
           phone_public: values.phone_public,
+          notifications_enabled: values.notifications_enabled,
           speed: values.speed,
           pace: values.pace,
           power: values.power,
@@ -266,7 +283,7 @@ export default function ProfilePage() {
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="username"
@@ -309,6 +326,29 @@ export default function ProfilePage() {
                       </FormLabel>
                       <FormDescription>
                         {t('profile.sharePhoneDesc')}
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="notifications_enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">
+                        Push Notifications
+                      </FormLabel>
+                      <FormDescription>
+                        Receive notifications about new matches
                       </FormDescription>
                     </div>
                     <FormControl>

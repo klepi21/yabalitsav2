@@ -7,12 +7,15 @@ create table public.profiles (
   username text unique,
   full_name text,
   avatar_url text,
+  phone_number text,
+  phone_public boolean default false,
+  notifications_enabled boolean default false,
   skill_level int check (skill_level between 1 and 5),
   telegram_link text,
   instagram_link text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  community_rating decimal(3,2) default 0,
+  community_rating decimal(3,1) default 0,
   total_matches int default 0
 );
 

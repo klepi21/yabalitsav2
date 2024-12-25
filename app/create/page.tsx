@@ -35,6 +35,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SoccerBall } from "@/components/icons/soccer-ball";
 import { useLanguage } from "@/lib/language-context";
+import { sendNewMatchNotification } from "@/lib/notifications";
 
 export default function CreateMatch() {
   const router = useRouter();
@@ -126,7 +127,10 @@ export default function CreateMatch() {
           private_code,
           status: 'upcoming'
         })
-        .select()
+        .select(`
+          *,
+          venue:venues(*)
+        `)
         .single();
 
       if (matchError) throw matchError;
@@ -140,6 +144,11 @@ export default function CreateMatch() {
         });
 
       if (participantError) throw participantError;
+
+      // Send notification about new match
+      if (!values.is_private) {
+        await sendNewMatchNotification(match);
+      }
 
       toast({
         title: "Success",
