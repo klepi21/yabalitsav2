@@ -30,6 +30,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { format, isBefore, startOfToday } from "date-fns";
+import { el } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -94,8 +95,8 @@ export default function CreateMatch() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      max_players: 10,
-      cost_per_player: 5,
+      max_players: 12,
+      cost_per_player: 6,
       is_private: false,
       venue_confirmed: false,
     },
@@ -250,7 +251,7 @@ export default function CreateMatch() {
                               )}
                             >
                               {field.value ? (
-                                format(field.value, "PPP")
+                                format(field.value, "PPP", { locale: el })
                               ) : (
                                 <span>{t('create.date.placeholder')}</span>
                               )}
@@ -265,6 +266,7 @@ export default function CreateMatch() {
                             onSelect={field.onChange}
                             disabled={(date) => date < new Date()}
                             initialFocus
+                            locale={el}
                           />
                         </PopoverContent>
                       </Popover>
