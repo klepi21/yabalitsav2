@@ -10,7 +10,9 @@ export function OneSignalProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initOneSignal = async () => {
       try {
+        // Initialize OneSignal
         await initializeOneSignal();
+        console.log('OneSignal initialization completed');
         
         // Set user ID for targeting if logged in
         const { data: { user } } = await supabase.auth.getUser();
@@ -27,7 +29,7 @@ export function OneSignalProvider({ children }: { children: React.ReactNode }) {
           console.log('User profile notification preference:', profile?.notifications_enabled);
         }
       } catch (error) {
-        console.error('Error initializing OneSignal:', error);
+        console.error('Error in OneSignal provider:', error);
       }
     };
 
